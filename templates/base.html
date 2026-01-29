@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="{% block meta_description %}Modern CMS - Zamonaviy kontent boshqaruv tizimi{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}cms, news, articles, blog{% endblock %}">
+    <title>{% block title %}Modern CMS{% endblock %}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <i class="fas fa-newspaper"></i>
+                    <span>Modern CMS</span>
+                </a>
+
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="/" class="{% if active_page == 'home' %}active{% endif %}">Bosh sahifa</a></li>
+                        <li class="has-dropdown">
+                            <a href="/categories">Kategoriyalar <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown">
+                                {% for cat in categories %}
+                                <li><a href="/category/{{ cat.slug }}">{{ cat.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        <li><a href="/tags">Teglar</a></li>
+                    </ul>
+                </nav>
+
+                <div class="header-actions">
+                    <form class="search-form" action="/search" method="get">
+                        <input type="text" name="q" placeholder="Qidirish..." required>
+                        <button type="submit"><i class="fas fa-search"></i></button>
+                    </form>
+
+                    {% if current_user %}
+                    <div class="user-menu">
+                        <button class="user-btn">
+                            <img src="{{ current_user.avatar or '/static/images/default-avatar.png' }}" alt="">
+                            <span>{{ current_user.username }}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <ul class="user-dropdown">
+                            <li><a href="/profile"><i class="fas fa-user"></i> Profil</a></li>
+                            {% if current_user.group and current_user.group.can_access_admin %}
+                            <li><a href="/admin"><i class="fas fa-cog"></i> Admin Panel</a></li>
+                            {% endif %}
+                            <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Chiqish</a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="/login" class="btn btn-outline">Kirish</a>
+                    <a href="/register" class="btn btn-primary">Ro'yxatdan o'tish</a>
+                    {% endif %}
+
+                    <button class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Modern CMS</h3>
+                    <p>Zamonaviy, tez va xavfsiz kontent boshqaruv tizimi. Python va FastAPI asosida yaratilgan.</p>
+                    <div class="social-links">
+                        <a href="https://t.me/MahmudbekJumaniyazov" target="_blank"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Tezkor havolalar</h4>
+                    <ul>
+                        <li><a href="/">Bosh sahifa</a></li>
+                        <li><a href="/categories">Kategoriyalar</a></li>
+                        <li><a href="/tags">Teglar</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Kategoriyalar</h4>
+                    <ul>
+                        {% for cat in categories[:5] %}
+                        <li><a href="/category/{{ cat.slug }}">{{ cat.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Aloqa</h4>
+                    <ul class="contact-info">
+                        <li><a href="https://t.me/MahmudbekJumaniyazov" target="_blank"><i class="fab fa-telegram"></i>
+                                @MahmudbekJumaniyazov</a></li>
+                        <li><i class="fas fa-envelope"></i> info@moderncms.uz</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Modern CMS. Barcha huquqlar himoyalangan.</p>
+                <p class="created-by">Created by <a href="https://www.Maxmudbek.uz" target="_blank">www.Maxmudbek.uz</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

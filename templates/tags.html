@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Teglar - Modern CMS{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-tags"></i> Barcha Teglar</h1>
+        <p>Mavzular bo'yicha maqolalarni toping</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="tags-cloud">
+        {% if all_tags %}
+        {% for tag in all_tags %}
+        <a href="/tag/{{ tag.slug }}" class="tag-item" style="--size: {{ (tag.posts_count * 0.1 + 1)|round(1) }};">
+            <i class="fas fa-hashtag"></i>
+            {{ tag.name }}
+            <span class="tag-count">{{ tag.posts_count }}</span>
+        </a>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-tags"></i>
+            <h3>Teglar hali mavjud emas</h3>
+            <p>Maqolalarga teg qo'shilgandan so'ng bu yerda ko'rinadi</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+
+    .page-header h1 i {
+        margin-right: 15px;
+    }
+
+    .page-header p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    .tags-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        padding: 20px 0 60px;
+    }
+
+    .tag-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: white;
+        padding: 12px 20px;
+        border-radius: 50px;
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        font-size: calc(0.9rem * var(--size, 1));
+    }
+
+    .tag-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(17, 153, 142, 0.25);
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .tag-item:hover .tag-count {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+
+    .tag-item i {
+        font-size: 0.85em;
+        opacity: 0.6;
+    }
+
+    .tag-count {
+        background: #f0f0f0;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        color: #666;
+        transition: all 0.3s ease;
+    }
+
+    .empty-state {
+        width: 100%;
+        text-align: center;
+        padding: 60px;
+        color: #999;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        color: #666;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}

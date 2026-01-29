@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %} - Modern CMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <a href="/admin" class="logo"><i class="fas fa-cog"></i> Admin Panel</a>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="/admin" class="{% if active == 'dashboard' %}active{% endif %}"><i
+                                class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a href="/admin/posts" class="{% if active == 'posts' %}active{% endif %}"><i
+                                class="fas fa-newspaper"></i> Maqolalar</a></li>
+                    <li><a href="/admin/categories" class="{% if active == 'categories' %}active{% endif %}"><i
+                                class="fas fa-folder"></i> Kategoriyalar</a></li>
+                    <li><a href="/admin/comments" class="{% if active == 'comments' %}active{% endif %}"><i
+                                class="fas fa-comments"></i> Izohlar</a></li>
+                    <li><a href="/admin/users" class="{% if active == 'users' %}active{% endif %}"><i
+                                class="fas fa-users"></i> Foydalanuvchilar</a></li>
+                    <li><a href="/admin/pages" class="{% if active == 'pages' %}active{% endif %}"><i
+                                class="fas fa-file-alt"></i> Sahifalar</a></li>
+                    <li><a href="/admin/settings" class="{% if active == 'settings' %}active{% endif %}"><i
+                                class="fas fa-cogs"></i> Sozlamalar</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="/"><i class="fas fa-external-link-alt"></i> Saytga qaytish</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="admin-main">
+            <header class="admin-header">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Qidirish...">
+                </div>
+                <div class="header-actions">
+                    <!-- Notifications Dropdown -->
+                    <div class="notifications-dropdown">
+                        <button class="notification-btn" onclick="toggleNotifications()">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge">0</span>
+                        </button>
+                        <div class="notifications-menu" id="notificationsMenu">
+                            <div class="notifications-header">
+                                <h4>Bildirishnomalar</h4>
+                            </div>
+                            <div class="notifications-body">
+                                <div class="notification-empty">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>Yangi bildirishnomalar yo'q</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Dropdown -->
+                    <div class="user-dropdown">
+                        <button class="user-menu-btn" onclick="toggleUserMenu()">
+                            <img src="{{ current_user.avatar or '/static/images/default-avatar.svg' }}" alt="">
+                            <span>{{ current_user.username }}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-menu-dropdown" id="userMenuDropdown">
+                            <a href="/profile"><i class="fas fa-user"></i> Profil</a>
+                            <a href="/admin/settings"><i class="fas fa-cog"></i> Sozlamalar</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Chiqish</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <main class="admin-content">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    <script src="/static/js/admin.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }} - Modern CMS{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header" style="margin-bottom: 2rem;">
+        <h1><i class="fas fa-folder"></i> {{ category.name }}</h1>
+        <p>{{ category.description or 'Bu kategoriyaga tegishli maqolalar' }}</p>
+    </div>
+
+    <div class="content-with-sidebar">
+        <div class="content">
+            <div class="posts-grid">
+                {% for post in posts %}
+                <article class="post-card">
+                    <div class="post-card-image">
+                        <a href="/post/{{ post.slug }}">
+                            <img src="{{ post.thumbnail or '/static/images/default-post.jpg' }}" alt="{{ post.title }}">
+                        </a>
+                    </div>
+                    <div class="post-card-content">
+                        <h3 class="post-card-title">
+                            <a href="/post/{{ post.slug }}">{{ post.title }}</a>
+                        </h3>
+                        <p class="post-card-excerpt">{{ post.short_content }}</p>
+                        <div class="post-card-meta">
+                            <span>{{ post.created_at.strftime('%d.%m.%Y') }}</span>
+                            <span><i class="fas fa-eye"></i> {{ post.views_count }}</span>
+                        </div>
+                    </div>
+                </article>
+                {% else %}
+                <p style="text-align:center; color: var(--gray-500);">Bu kategoriyada maqolalar yo'q</p>
+                {% endfor %}
+            </div>
+
+            {% if total_pages > 1 %}
+            <div class="pagination">
+                {% for p in range(1, total_pages + 1) %}
+                <a href="?page={{ p }}" class="{% if p == page %}active{% endif %}">{{ p }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <aside class="sidebar">
+            <div class="sidebar-widget">
+                <h3>Kategoriyalar</h3>
+                <ul class="category-list">
+                    {% for cat in categories %}
+                    <li><a href="/category/{{ cat.slug }}" class="{% if cat.id == category.id %}active{% endif %}">{{
+                            cat.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

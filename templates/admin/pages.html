@@ -1,0 +1,99 @@
+{% extends "admin/base.html" %}
+{% block title %}Sahifalar{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Statik Sahifalar</h1>
+        <p>Biz haqimizda, Aloqa kabi sahifalarni boshqarish</p>
+    </div>
+    <button class="btn btn-primary" onclick="document.getElementById('newPageModal').style.display='flex'"><i
+            class="fas fa-plus"></i> Yangi sahifa</button>
+</div>
+
+<div class="admin-card">
+    <div class="card-body">
+        {% if pages %}
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Sarlavha</th>
+                    <th>URL</th>
+                    <th>Status</th>
+                    <th>Yaratilgan</th>
+                    <th>Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for page in pages %}
+                <tr>
+                    <td>{{ page.id }}</td>
+                    <td>{{ page.title }}</td>
+                    <td>/page/{{ page.slug }}</td>
+                    <td><span class="badge {{ 'badge-success' if page.is_active else 'badge-warning' }}">{{ 'Faol' if
+                            page.is_active else 'Nofaol' }}</span></td>
+                    <td>{{ page.created_at.strftime('%d.%m.%Y') }}</td>
+                    <td class="actions">
+                        <a href="/admin/pages/{{ page.id }}/edit" class="btn-icon"><i class="fas fa-edit"></i></a>
+                        <a href="/page/{{ page.slug }}" target="_blank" class="btn-icon"><i class="fas fa-eye"></i></a>
+                        <button class="btn-icon btn-danger" onclick="deletePage({{ page.id }})"><i
+                                class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 3rem; color: var(--gray-500);">
+            <i class="fas fa-file-alt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>Hozircha sahifalar yo'q</p>
+            <button class="btn btn-primary"
+                onclick="document.getElementById('newPageModal').style.display='flex'">Birinchi sahifani
+                yarating</button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- New Page Modal -->
+<div id="newPageModal"
+    style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1000;">
+    <div style="background:white; padding:2rem; border-radius:0.5rem; width:600px; max-height:80vh; overflow-y:auto;">
+        <h2 style="margin-bottom:1.5rem;">Yangi sahifa qo'shish</h2>
+        <form action="/admin/pages/new" method="post">
+            <div class="form-group">
+                <label>Sarlavha</label>
+                <input type="text" name="title" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>URL (slug)</label>
+                <input type="text" name="slug" class="form-control" placeholder="biz-haqimizda">
+            </div>
+            <div class="form-group">
+                <label>Matn</label>
+                <textarea name="content" class="form-control" rows="10" required></textarea>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="is_active" checked> Faol</label>
+            </div>
+            <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+                <button type="submit" class="btn btn-primary">Saqlash</button>
+                <button type="button" class="btn"
+                    onclick="document.getElementById('newPageModal').style.display='none'">Bekor qilish</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function deletePage(id) {
+        if (confirm('Bu sahifani o\'chirmoqchimisiz?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/pages/${id}/delete`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
+{% endblock %}

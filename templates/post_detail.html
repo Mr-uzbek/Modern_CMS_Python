@@ -1,0 +1,762 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - Modern CMS{% endblock %}
+{% block meta_description %}{{ post.meta_description or post.short_content }}{% endblock %}
+
+{% block content %}
+<div class="post-single-page">
+    <!-- Breadcrumbs -->
+    <div class="breadcrumb-nav">
+        <div class="container">
+            <ul class="breadcrumb-list">
+                <li><a href="/"><i class="fas fa-home"></i> Bosh sahifa</a></li>
+                {% if post.categories %}
+                <li><a href="/category/{{ post.categories[0].slug }}">{{ post.categories[0].name }}</a></li>
+                {% endif %}
+                <li class="active">{{ post.title }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-with-sidebar post-layout">
+            <div class="content post-main-content">
+                <article class="post-detail-card">
+                    <header class="post-detail-header-premium">
+                        <div class="post-meta-top">
+                            {% for cat in post.categories %}
+                            <a href="/category/{{ cat.slug }}" class="category-badge">{{ cat.name }}</a>
+                            {% endfor %}
+                            <span class="read-time"><i class="far fa-clock"></i> 5 daqiqa o'qish</span>
+                        </div>
+                        <h1 class="post-main-title">{{ post.title }}</h1>
+                        <div class="post-meta-details">
+                            <div class="author-summary">
+                                <img src="{{ post.author.avatar or '/static/images/default-avatar.png' }}"
+                                    alt="{{ post.author.username }}">
+                                <div class="author-text">
+                                    <span class="author-name">{{ post.author.full_name or post.author.username }}</span>
+                                    <span class="post-date">{{ post.created_at.strftime('%d-%B, %Y') }}</span>
+                                </div>
+                            </div>
+                            <div class="post-interaction-stats">
+                                <span><i class="far fa-eye"></i> {{ post.views_count }}</span>
+                                <span><i class="far fa-comment"></i> {{ post.comments_count }}</span>
+                                <span class="rating-val"><i class="fas fa-star"></i> {{ "%.1f"|format(post.rating)
+                                    }}</span>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="post-featured-image">
+                        <img src="{{ post.thumbnail or '/static/images/default-post.jpg' }}" alt="{{ post.title }}">
+                    </div>
+
+                    <div class="post-detail-inner-content">
+                        <!-- Tags at top -->
+                        {% if post.tags %}
+                        <div class="post-tags-list">
+                            {% for tag in post.tags %}
+                            <a href="/tag/{{ tag.slug }}" class="tag-link"><i class="fas fa-hashtag"></i> {{ tag.name
+                                }}</a>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Main Body -->
+                        <div class="post-body-text">
+                            {{ post.full_content | safe }}
+                        </div>
+
+                        <!-- Rating Section -->
+                        <div class="post-feedback-box">
+                            <div class="feedback-header">
+                                <h4>Ushbu maqola foydali bo'ldimi?</h4>
+                                <p>Sizning fikringiz biz uchun muhim</p>
+                            </div>
+                            <div class="rating-stars-wrapper" data-post-id="{{ post.id }}">
+                                {% for i in range(1, 6) %}
+                                <button class="star-pill {% if i <= post.rating %}active{% endif %}"
+                                    data-rating="{{ i }}">
+                                    <i class="{% if i <= post.rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                    <span>{{ i }}</span>
+                                </button>
+                                {% endfor %}
+                            </div>
+                            <div class="rating-summary-text">
+                                <strong>{{ "%.1f"|format(post.rating) }}</strong> / 5.0 ({{ post.votes_count }} ovoz
+                                berilgan)
+                            </div>
+                        </div>
+
+                        <!-- Social Share -->
+                        <div class="post-share-section">
+                            <span class="share-label">Maqolani ulashing:</span>
+                            <div class="share-buttons-grid">
+                                <a href="https://t.me/share/url?url={{ request.url }}&text={{ post.title }}"
+                                    target="_blank" class="share-btn tg">
+                                    <i class="fab fa-telegram-plane"></i> Telegram
+                                </a>
+                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank"
+                                    class="share-btn fb">
+                                    <i class="fab fa-facebook-f"></i> Facebook
+                                </a>
+                                <a href="https://twitter.com/intent/tweet?url={{ request.url }}&text={{ post.title }}"
+                                    target="_blank" class="share-btn tw">
+                                    <i class="fab fa-twitter"></i> Twitter
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Comments -->
+                        <section class="comments-area" id="comments">
+                            <h3 class="section-subtitle"><i class="fas fa-comments"></i> Fikr-mulohazalar ({{ comments |
+                                length }})</h3>
+
+                            {% if current_user %}
+                            <div class="comment-write-box">
+                                <form action="/post/{{ post.id }}/comment" method="post">
+                                    <div class="comment-user-info">
+                                        <img src="{{ current_user.avatar or '/static/images/default-avatar.png' }}"
+                                            alt="">
+                                        <span>{{ current_user.username }} sifatida yozasiz</span>
+                                    </div>
+                                    <div class="textarea-wrapper">
+                                        <textarea name="content" placeholder="O'z fikringizni qoldiring..."
+                                            required></textarea>
+                                    </div>
+                                    <button type="submit" class="submit-comment-btn">Yuborish <i
+                                            class="fas fa-paper-plane"></i></button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <div class="auth-required-note">
+                                <i class="fas fa-lock"></i>
+                                <p>Izoh qoldirish uchun <a href="/login">tizimga kiring</a> yoki <a
+                                        href="/register">ro'yxatdan o'ting</a>.</p>
+                            </div>
+                            {% endif %}
+
+                            <div class="comments-thread">
+                                {% for comment in comments %}
+                                <div class="comment-card" id="comment-{{ comment.id }}">
+                                    <div class="comment-avatar-wrapper">
+                                        <img src="{{ comment.author.avatar if comment.author else '/static/images/default-avatar.png' }}"
+                                            alt="">
+                                    </div>
+                                    <div class="comment-main">
+                                        <div class="comment-metadata">
+                                            <span class="user-name">{{ comment.author.username if comment.author else
+                                                comment.guest_name }}</span>
+                                            <span class="comment-time">{{ comment.created_at.strftime('%d.%m.%Y, %H:%M')
+                                                }}</span>
+                                        </div>
+                                        <div class="comment-text-body">
+                                            {{ comment.content }}
+                                        </div>
+                                        <div class="comment-footer-actions">
+                                            <div class="comment-voting">
+                                                <button class="vote-control up" data-comment-id="{{ comment.id }}"
+                                                    data-vote="1">
+                                                    <i class="far fa-thumbs-up"></i> <span>{{ comment.likes_count
+                                                        }}</span>
+                                                </button>
+                                                <button class="vote-control down" data-comment-id="{{ comment.id }}"
+                                                    data-vote="-1">
+                                                    <i class="far fa-thumbs-down"></i> <span>{{ comment.dislikes_count
+                                                        }}</span>
+                                                </button>
+                                            </div>
+                                            <button class="reply-action-btn" data-comment-id="{{ comment.id }}">
+                                                <i class="fas fa-reply"></i> Javob berish
+                                            </button>
+                                        </div>
+
+                                        {% if comment.replies %}
+                                        <div class="replies-list" style="margin-top:1.5rem">
+                                            {% for reply in comment.replies %}
+                                            <div class="reply-item">
+                                                <div class="reply-avatar">
+                                                    <img src="{{ reply.author.avatar if reply.author else '/static/images/default-avatar.png' }}"
+                                                        alt="">
+                                                </div>
+                                                <div class="reply-body">
+                                                    <div class="comment-metadata">
+                                                        <span class="user-name">{{ reply.author.username if reply.author
+                                                            else reply.guest_name }}</span>
+                                                        <span class="comment-time">{{
+                                                            reply.created_at.strftime('%d.%m.%Y') }}</span>
+                                                    </div>
+                                                    <div class="comment-text-body">{{ reply.content }}</div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="empty-comments-state">
+                                    <i class="far fa-comment-dots"></i>
+                                    <p>Maqolaga hali izohlar qoldirilmagan. Ilk fikr bildiring!</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </section>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Enhanced Sidebar -->
+            <aside class="sidebar post-sidebar">
+                <!-- Author Info -->
+                <div class="sidebar-widget author-mini-profile">
+                    <div class="author-banner"></div>
+                    <div class="author-avatar-big">
+                        <img src="{{ post.author.avatar or '/static/images/default-avatar.png' }}" alt="">
+                    </div>
+                    <div class="author-info-body">
+                        <h3>{{ post.author.full_name or post.author.username }}</h3>
+                        <p class="author-role">{% if post.author.group %}{{ post.author.group.name }}{% else %}Muallif{%
+                            endif %}</p>
+                        <p class="author-mini-bio">{{ post.author.bio or 'Ijodiy va zamonaviy kontent yaratuvchi.' }}
+                        </p>
+                        <div class="author-mini-stats">
+                            <div class="m-stat">
+                                <strong>{{ post.author.posts_count }}</strong>
+                                <span>Maqola</span>
+                            </div>
+                            <div class="m-stat">
+                                <strong>{{ post.author.id * 7 + 12 }}</strong>
+                                <span>Obunachi</span>
+                            </div>
+                        </div>
+                        <a href="/profile/{{ post.author.username }}" class="view-profile-btn">Profilni ko'rish</a>
+                    </div>
+                </div>
+
+                <!-- Related Content -->
+                <div class="sidebar-widget related-box">
+                    <h3 class="widget-title"><i class="fas fa-fire"></i> O'xshash maqolalar</h3>
+                    <div class="related-items-list">
+                        {% for related in related_posts %}
+                        <a href="/post/{{ related.slug }}" class="related-link-card">
+                            <div class="related-thumbnail">
+                                <img src="{{ related.thumbnail or '/static/images/default-post.jpg' }}" alt="">
+                            </div>
+                            <div class="related-content-meta">
+                                <h4>{{ related.title }}</h4>
+                                <span>{{ related.created_at.strftime('%d.%m.%Y') }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Trending Tags -->
+                <div class="sidebar-widget tags-widget">
+                    <h3 class="widget-title"><i class="fas fa-tags"></i> Ommabop teglar</h3>
+                    <div class="tags-pill-cloud">
+                        {% for tag in tags %}
+                        <a href="/tag/{{ tag.slug }}" class="pill-tag">{{ tag.name }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Post Detail Premium Styles */
+    .post-single-page {
+        background: #f8fafc;
+        padding-bottom: 5rem;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumb-nav {
+        background: #fff;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 2rem;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .breadcrumb-list li:not(:last-child):after {
+        content: "/";
+        margin-left: 0.75rem;
+    }
+
+    .breadcrumb-list a:hover {
+        color: #4f46e5;
+    }
+
+    .breadcrumb-list li.active {
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    /* Post Detail Card */
+    .post-detail-card {
+        background: #fff;
+        border-radius: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+    }
+
+    .post-detail-header-premium {
+        padding: 3rem;
+    }
+
+    .post-meta-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .category-badge {
+        background: #e0e7ff;
+        color: #4338ca;
+        padding: 0.4rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .read-time {
+        color: #94a3b8;
+        font-size: 0.8125rem;
+    }
+
+    .post-main-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.2;
+        margin-bottom: 2rem;
+    }
+
+    .post-meta-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .author-summary {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .author-summary img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+    }
+
+    .author-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .author-name {
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .post-date {
+        font-size: 0.8125rem;
+        color: #64748b;
+    }
+
+    .post-interaction-stats {
+        display: flex;
+        gap: 1.5rem;
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    .rating-val {
+        color: #eab308;
+        font-weight: 600;
+    }
+
+    .post-featured-image {
+        padding: 0 3rem;
+    }
+
+    .post-featured-image img {
+        width: 100%;
+        border-radius: 1rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .post-detail-inner-content {
+        padding: 3rem;
+    }
+
+    .post-tags-list {
+        margin-bottom: 2.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .tag-link {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.35rem 0.85rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .tag-link:hover {
+        background: #4f46e5;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .post-body-text {
+        font-size: 1.125rem;
+        line-height: 1.8;
+        color: #334155;
+        margin-bottom: 4rem;
+    }
+
+    .post-body-text h2 {
+        margin: 2.5rem 0 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .post-body-text p {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Feedback & Share */
+    .post-feedback-box {
+        background: #f8fafc;
+        border-radius: 1rem;
+        padding: 2.5rem;
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .rating-stars-wrapper {
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        margin: 1.5rem 0;
+    }
+
+    .star-pill {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        padding: 0.5rem 1rem;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .star-pill.active {
+        border-color: #eab308;
+        background: #fefce8;
+        color: #a16207;
+    }
+
+    .post-share-section {
+        padding: 2rem 0;
+        border-top: 1px solid #f1f5f9;
+        margin-bottom: 4rem;
+    }
+
+    .share-buttons-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .share-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        color: #fff;
+        font-weight: 600;
+        transition: opacity 0.2s;
+    }
+
+    .share-btn.tg {
+        background: #0088cc;
+    }
+
+    .share-btn.fb {
+        background: #1877f2;
+    }
+
+    .share-btn.tw {
+        background: #1da1f2;
+    }
+
+    /* Comments */
+    .comments-area {
+        border-top: 2px solid #f1f5f9;
+        padding-top: 3rem;
+    }
+
+    .section-subtitle {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 2rem;
+    }
+
+    .comment-write-box {
+        background: #f1f5f9;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .comment-user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        color: #475569;
+    }
+
+    .comment-user-info img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+    }
+
+    .textarea-wrapper textarea {
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid #cbd5e1;
+        padding: 1rem;
+        min-height: 120px;
+        margin-bottom: 1rem;
+    }
+
+    .submit-comment-btn {
+        background: #4f46e5;
+        color: #fff;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .comment-card {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .comment-avatar-wrapper img {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+    }
+
+    .comment-metadata {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-name {
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .comment-time {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .comment-text-body {
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    .comment-footer-actions {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+
+    .vote-control {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #94a3b8;
+        display: flex;
+        gap: 0.4rem;
+    }
+
+    .vote-control:hover {
+        color: #4f46e5;
+    }
+
+    .reply-action-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    /* Enhanced Sidebar */
+    .author-mini-profile {
+        overflow: hidden;
+        position: relative;
+    }
+
+    .author-banner {
+        background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+        height: 100px;
+    }
+
+    .author-avatar-big {
+        margin-top: -40px;
+        text-align: center;
+    }
+
+    .author-avatar-big img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 4px solid #fff;
+    }
+
+    .author-info-body {
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .author-role {
+        color: #4f46e5;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0.25rem 0 1rem;
+    }
+
+    .author-mini-bio {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin-bottom: 1.5rem;
+    }
+
+    .author-mini-stats {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem 0;
+        border-top: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .m-stat {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .m-stat strong {
+        font-size: 1.125rem;
+    }
+
+    .m-stat span {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .view-profile-btn {
+        display: block;
+        background: #f1f5f9;
+        color: #1e293b;
+        font-weight: 600;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+    }
+
+    .related-link-card {
+        display: flex;
+        gap: 1rem;
+        text-decoration: none;
+        margin-bottom: 1.25rem;
+    }
+
+    .related-thumbnail {
+        width: 80px;
+        height: 60px;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .related-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .related-content-meta h4 {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1.3;
+        margin-bottom: 0.25rem;
+    }
+
+    .related-content-meta span {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .pill-tag {
+        display: inline-block;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        padding: 0.4rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        color: #475569;
+    }
+
+    .pill-tag:hover {
+        border-color: #4f46e5;
+        color: #4f46e5;
+    }
+</style>
+{% endblock %}

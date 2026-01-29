@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Kirish - Modern CMS{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <h1><i class="fas fa-sign-in-alt"></i> Kirish</h1>
+        <p class="subtitle">Hisobingizga kiring</p>
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        <form method="post" action="/login">
+            <div class="form-group">
+                <label for="username">Foydalanuvchi nomi</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Parol</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            <div class="form-group checkbox-group">
+                <label><input type="checkbox" name="remember_me"> Eslab qolish</label>
+                <a href="https://t.me/MahmudbekJumaniyazov" target="_blank" class="forgot-link">Parolni
+                    unutdingizmi?</a>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">Kirish</button>
+        </form>
+        <div class="auth-footer">
+            <p>Hisobingiz yo'qmi? <a href="/register">Ro'yxatdan o'ting</a></p>
+        </div>
+    </div>
+</div>
+<style>
+    .checkbox-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .forgot-link {
+        font-size: 0.9rem;
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .forgot-link:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Bosh sahifa - Modern CMS{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Zamonaviy Kontent Tizimi</h1>
+            <p>Eng so'nggi yangiliklar, qiziqarli maqolalar va foydali ma'lumotlar bir joyda</p>
+            <form class="hero-search" action="/search" method="get">
+                <input type="text" name="q" placeholder="Nimani qidiryapsiz?">
+                <button type="submit" class="btn btn-primary">Qidirish</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Featured Post -->
+    {% if featured_post %}
+    <article class="featured-post">
+        <div class="featured-post-image">
+            <a href="/post/{{ featured_post.slug }}">
+                <img src="{{ featured_post.thumbnail or '/static/images/default-post.jpg' }}"
+                    alt="{{ featured_post.title }}">
+            </a>
+        </div>
+        <div class="featured-post-content">
+            <span class="featured-post-category">
+                {% if featured_post.categories %}{{ featured_post.categories[0].name }}{% else %}Umumiy{% endif %}
+            </span>
+            <h2 class="featured-post-title">
+                <a href="/post/{{ featured_post.slug }}">{{ featured_post.title }}</a>
+            </h2>
+            <p class="featured-post-excerpt">{{ featured_post.short_content }}</p>
+            <div class="post-card-meta">
+                <div class="post-card-author">
+                    <img src="{{ featured_post.author.avatar or '/static/images/default-avatar.png' }}" alt="">
+                    <span>{{ featured_post.author.username }}</span>
+                </div>
+                <div class="post-card-stats">
+                    <span><i class="fas fa-eye"></i> {{ featured_post.views_count }}</span>
+                    <span><i class="fas fa-comment"></i> {{ featured_post.comments_count }}</span>
+                </div>
+            </div>
+            <a href="/post/{{ featured_post.slug }}" class="btn btn-primary" style="margin-top: 1.5rem;">Davomi</a>
+        </div>
+    </article>
+    {% endif %}
+
+    <div class="content-with-sidebar">
+        <div class="content">
+            <!-- Recent Posts -->
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-clock"></i> So'nggi maqolalar</h2>
+                <a href="/posts" class="btn btn-outline btn-sm">Barchasi</a>
+            </div>
+
+            <div class="posts-grid">
+                {% for post in posts %}
+                <article class="post-card">
+                    <div class="post-card-image">
+                        <a href="/post/{{ post.slug }}">
+                            <img src="{{ post.thumbnail or '/static/images/default-post.jpg' }}" alt="{{ post.title }}">
+                        </a>
+                        {% if post.categories %}
+                        <span class="post-card-category">{{ post.categories[0].name }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="post-card-content">
+                        <h3 class="post-card-title">
+                            <a href="/post/{{ post.slug }}">{{ post.title }}</a>
+                        </h3>
+                        <p class="post-card-excerpt">{{ post.short_content }}</p>
+                        <div class="post-card-meta">
+                            <div class="post-card-author">
+                                <img src="{{ post.author.avatar or '/static/images/default-avatar.png' }}" alt="">
+                                <span>{{ post.author.username }}</span>
+                            </div>
+                            <div class="post-card-stats">
+                                <span><i class="fas fa-eye"></i> {{ post.views_count }}</span>
+                                <span><i class="fas fa-comment"></i> {{ post.comments_count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>Hozircha maqolalar yo'q</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if total_pages > 1 %}
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="?page={{ page - 1 }}"><i class="fas fa-chevron-left"></i></a>
+                {% endif %}
+
+                {% for p in range(1, total_pages + 1) %}
+                {% if p == page %}
+                <span class="active">{{ p }}</span>
+                {% else %}
+                <a href="?page={{ p }}">{{ p }}</a>
+                {% endif %}
+                {% endfor %}
+
+                {% if page < total_pages %} <a href="?page={{ page + 1 }}"><i class="fas fa-chevron-right"></i></a>
+                    {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Popular Posts -->
+            <div class="sidebar-widget">
+                <h3><i class="fas fa-fire"></i> Ommabop</h3>
+                <div class="popular-posts">
+                    {% for post in popular_posts %}
+                    <a href="/post/{{ post.slug }}" class="popular-post">
+                        <div class="popular-post-image">
+                            <img src="{{ post.thumbnail or '/static/images/default-post.jpg' }}" alt="">
+                        </div>
+                        <div>
+                            <p class="popular-post-title">{{ post.title }}</p>
+                            <span class="popular-post-date"><i class="fas fa-eye"></i> {{ post.views_count }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="sidebar-widget">
+                <h3><i class="fas fa-folder"></i> Kategoriyalar</h3>
+                <ul class="category-list">
+                    {% for cat in categories %}
+                    <li>
+                        <a href="/category/{{ cat.slug }}">
+                            <span>{{ cat.name }}</span>
+                            <span class="count">{{ cat.posts_count }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Tags -->
+            <div class="sidebar-widget">
+                <h3><i class="fas fa-tags"></i> Teglar</h3>
+                <div class="tags-cloud">
+                    {% for tag in tags %}
+                    <a href="/tag/{{ tag.slug }}" class="tag">{{ tag.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

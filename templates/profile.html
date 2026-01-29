@@ -1,0 +1,635 @@
+{% extends "base.html" %}
+
+{% block title %}Profil - {{ current_user.username }} - Modern CMS{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Profile Header / Cover -->
+    <div class="profile-hero">
+        <div class="profile-cover" style="background: linear-gradient(135deg, #4f46e5, #8b5cf6);">
+            <div class="cover-overlay"></div>
+        </div>
+        <div class="container hero-content-wrapper">
+            <div class="profile-avatar-large">
+                <img src="{{ current_user.avatar or '/static/images/default-avatar.png' }}"
+                    alt="{{ current_user.username }}">
+                {% if current_user.is_verified %}
+                <span class="verified-badge" title="Tasdiqlangan foydalanuvchi"><i
+                        class="fas fa-check-circle"></i></span>
+                {% endif %}
+            </div>
+            <div class="profile-intro">
+                <div class="intro-left">
+                    <h1>{{ current_user.full_name or current_user.username }}</h1>
+                    <p class="user-role-label">{% if current_user.group %}{{ current_user.group.name }}{% else
+                        %}Foydalanuvchi{% endif %}</p>
+                </div>
+                <div class="intro-right">
+                    <button class="btn btn-primary edit-profile-trigger"><i class="fas fa-edit"></i> Profilni
+                        tahrirlash</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container main-profile-layout">
+        <!-- Sidebar stats -->
+        <aside class="profile-sidebar">
+            <div class="profile-card info-card">
+                <h3><i class="fas fa-info-circle"></i> Ma'lumot</h3>
+                <ul class="info-list">
+                    <li><i class="far fa-calendar-alt"></i> <span>A'zo bo'ldi: <strong>{{
+                                current_user.created_at.strftime('%d.%m.%Y') }}</strong></span></li>
+                    {% if current_user.website %}
+                    <li><i class="fas fa-globe"></i> <a href="{{ current_user.website }}" target="_blank">{{
+                            current_user.website|replace('https://', '')|replace('http://', '') }}</a></li>
+                    {% endif %}
+                </ul>
+                <div class="sidebar-stats-grid">
+                    <div class="s-stat">
+                        <strong>{{ current_user.posts_count }}</strong>
+                        <span>Maqola</span>
+                    </div>
+                    <div class="s-stat">
+                        <strong>{{ current_user.comments_count }}</strong>
+                        <span>Izoh</span>
+                    </div>
+                </div>
+                <div class="profile-social-pills">
+                    {% if current_user.telegram %}
+                    <a href="https://t.me/{{ current_user.telegram }}" class="social-pill tg" target="_blank"><i
+                            class="fab fa-telegram"></i></a>
+                    {% endif %}
+                    {% if current_user.twitter %}
+                    <a href="https://twitter.com/{{ current_user.twitter }}" class="social-pill tw" target="_blank"><i
+                            class="fab fa-twitter"></i></a>
+                    {% endif %}
+                    {% if current_user.facebook %}
+                    <a href="https://facebook.com/{{ current_user.facebook }}" class="social-pill fb" target="_blank"><i
+                            class="fab fa-facebook"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="profile-card actions-card">
+                <h3><i class="fas fa-bolt"></i> Tezkor amallar</h3>
+                <div class="action-buttons-stack">
+                    {% if current_user.group and current_user.group.can_access_admin %}
+                    <a href="/admin" class="action-link"><i class="fas fa-shield-alt"></i> Admin Panel</a>
+                    {% endif %}
+                    {% if current_user.group and current_user.group.can_add_posts %}
+                    <a href="/admin/posts/new" class="action-link"><i class="fas fa-plus-circle"></i> Yangi maqola</a>
+                    {% endif %}
+                    <a href="/logout" class="action-link logout"><i class="fas fa-power-off"></i> Chiqish</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content (Tabs) -->
+        <div class="profile-main">
+            <div class="profile-tabs">
+                <button class="tab-btn active" data-tab="posts"><i class="fas fa-newspaper"></i> Maqolalarim</button>
+                <button class="tab-btn" data-tab="settings"><i class="fas fa-cog"></i> Sozlamalar</button>
+            </div>
+
+            <div class="tab-content" id="posts-tab">
+                {% if user_posts %}
+                <div class="profile-posts-grid">
+                    {% for post in user_posts %}
+                    <div class="profile-post-card">
+                        <div class="post-img">
+                            <img src="{{ post.thumbnail or '/static/images/default-post.jpg' }}" alt="">
+                            <span class="post-status-badge {{ 'published' if post.is_published else 'draft' }}">
+                                {{ 'Nashr etilgan' if post.is_published else 'Qoralama' }}
+                            </span>
+                        </div>
+                        <div class="post-details">
+                            <span class="post-date-mini">{{ post.created_at.strftime('%d.%m.%Y') }}</span>
+                            <h4><a href="/post/{{ post.slug }}">{{ post.title }}</a></h4>
+                            <div class="post-mini-meta">
+                                <span><i class="far fa-eye"></i> {{ post.views_count }}</span>
+                                <span><i class="far fa-comment"></i> {{ post.comments_count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-placeholder">
+                    <img src="/static/images/empty-posts.svg" alt=""
+                        style="width: 150px; opacity: 0.5; margin-bottom: 2rem;">
+                    <h3>Hali maqolalar yo'q</h3>
+                    <p>Siz yozgan maqolalar shu yerda ko'rinadi.</p>
+                    <a href="/admin/posts/new" class="btn btn-outline">Birinchi maqolani yozish</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="tab-content" id="settings-tab" style="display: none;">
+                <div class="settings-form-wrapper">
+                    <h3>Profil sozlamalari</h3>
+                    <form action="/profile/update" method="post" enctype="multipart/form-data"
+                        class="profile-edit-form">
+                        <div class="form-row avatar-edit-row">
+                            <div class="current-avatar">
+                                <img src="{{ current_user.avatar or '/static/images/default-avatar.png' }}" alt="">
+                            </div>
+                            <div class="form-group">
+                                <label>Profil rasmi</label>
+                                <input type="file" name="avatar" accept="image/*">
+                                <p class="help-text">JPG, PNG yoki WebP formatida. Tavsiya etilgan o'lcham: 400x400px
+                                </p>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>To'liq ism</label>
+                                <input type="text" name="full_name" value="{{ current_user.full_name or '' }}"
+                                    placeholder="Ismingizni kiriting">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Bio (O'zingiz haqingizda)</label>
+                            <textarea name="bio" rows="4"
+                                placeholder="O'zingiz haqingizda qisqacha ma'lumot...">{{ current_user.bio or '' }}</textarea>
+                        </div>
+                        <div class="form-row grid-2">
+                            <div class="form-group">
+                                <label>Veb-sayt</label>
+                                <input type="url" name="website" value="{{ current_user.website or '' }}"
+                                    placeholder="https://">
+                            </div>
+                            <div class="form-group">
+                                <label>Telegram username</label>
+                                <div class="input-prefix-group">
+                                    <span class="prefix">@</span>
+                                    <input type="text" name="telegram" value="{{ current_user.telegram or '' }}"
+                                        placeholder="username">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">O'zgarishlarni saqlash</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Profile Premium Styles */
+    .profile-container {
+        background: #f1f5f9;
+        min-height: 100vh;
+    }
+
+    .profile-hero {
+        position: relative;
+        padding-bottom: 80px;
+    }
+
+    .profile-cover {
+        height: 300px;
+        width: 100%;
+    }
+
+    .cover-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-content-wrapper {
+        margin-top: -100px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .profile-avatar-large {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        border: 6px solid #fff;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        background: #fff;
+        z-index: 5;
+    }
+
+    .profile-avatar-large img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .verified-badge {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background: #fff;
+        border-radius: 50%;
+        color: #4f46e5;
+        font-size: 1.5rem;
+        line-height: 1;
+    }
+
+    .profile-intro {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        max-width: 1000px;
+        padding: 0 2rem;
+    }
+
+    .profile-intro h1 {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+
+    .user-role-label {
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #4f46e5;
+        letter-spacing: 0.05em;
+    }
+
+    .main-profile-layout {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 2rem;
+        padding-bottom: 5rem;
+    }
+
+    .profile-card {
+        background: #fff;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-card h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 1.25rem;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-list {
+        list-style: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        color: #475569;
+        font-size: 0.875rem;
+    }
+
+    .sidebar-stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        padding: 1.25rem 0;
+        border-top: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .s-stat {
+        text-align: center;
+    }
+
+    .s-stat strong {
+        display: block;
+        font-size: 1.25rem;
+        color: #1e293b;
+    }
+
+    .s-stat span {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .profile-social-pills {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        margin-top: 1.25rem;
+    }
+
+    .social-pill {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        background: #f1f5f9;
+        transition: all 0.2s;
+    }
+
+    .social-pill:hover {
+        transform: translateY(-3px);
+        color: #fff;
+    }
+
+    .social-pill.tg:hover {
+        background: #0088cc;
+    }
+
+    .social-pill.tw:hover {
+        background: #1da1f2;
+    }
+
+    .social-pill.fb:hover {
+        background: #1877f2;
+    }
+
+    .action-buttons-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .action-link {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        color: #475569;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+
+    .action-link:hover {
+        background: #f1f5f9;
+        color: #4f46e5;
+    }
+
+    .action-link.logout:hover {
+        background: #fef2f2;
+        color: #ef4444;
+    }
+
+    /* Tabs */
+    .profile-tabs {
+        background: #fff;
+        border-radius: 1rem;
+        padding: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        border: none;
+        background: none;
+        font-weight: 700;
+        color: #64748b;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+        background: #4f46e5;
+        color: #fff;
+    }
+
+    /* Posts Grid */
+    .profile-posts-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .profile-post-card {
+        background: #fff;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .post-img {
+        height: 180px;
+        position: relative;
+    }
+
+    .post-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .post-status-badge {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.625rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .post-status-badge.published {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .post-status-badge.draft {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .post-details {
+        padding: 1.25rem;
+    }
+
+    .post-date-mini {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .post-details h4 {
+        margin: 0.5rem 0;
+        font-weight: 700;
+    }
+
+    .post-details h4 a {
+        color: #1e293b;
+    }
+
+    .post-mini-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    /* Settings Form */
+    .settings-form-wrapper {
+        background: #fff;
+        padding: 2.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .settings-form-wrapper h3 {
+        margin-bottom: 2rem;
+        font-weight: 800;
+    }
+
+    .profile-edit-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-edit-form label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .profile-edit-form input,
+    .profile-edit-form textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        background: #f8fafc;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .input-prefix-group {
+        display: flex;
+    }
+
+    .input-prefix-group .prefix {
+        background: #e2e8f0;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem 0 0 0.5rem;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+    }
+
+    .input-prefix-group input {
+        border-radius: 0 0.5rem 0.5rem 0;
+    }
+
+    .empty-placeholder {
+        text-align: center;
+        padding: 5rem;
+        background: #fff;
+        border-radius: 1rem;
+    }
+
+    .avatar-edit-row {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .current-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .current-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .help-text {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .main-profile-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-posts-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-intro {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const editTrigger = document.querySelector('.edit-profile-trigger');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                tabContents.forEach(content => {
+                    if (content.id === tabId + '-tab') {
+                        content.style.display = 'block';
+                    } else {
+                        content.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        if (editTrigger) {
+            editTrigger.addEventListener('click', () => {
+                document.querySelector('[data-tab="settings"]').click();
+            });
+        }
+    });
+</script>
+{% endblock %}

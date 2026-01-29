@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+{% block title %}Foydalanuvchilar{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Foydalanuvchilar</h1>
+        <p>Barcha foydalanuvchilarni boshqarish</p>
+    </div>
+</div>
+
+<div class="admin-card">
+    <div class="card-body">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Guruh</th>
+                    <th>Ro'yxatdan o'tgan</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.group.name if user.group else '-' }}</td>
+                    <td>{{ user.created_at.strftime('%d.%m.%Y') }}</td>
+                    <td><span class="badge {{ 'badge-success' if user.is_active else 'badge-danger' }}">{{ 'Faol' if
+                            user.is_active else 'Bloklangan' }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

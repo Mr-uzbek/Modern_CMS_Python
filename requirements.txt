@@ -1,0 +1,29 @@
+# FastAPI Framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Database
+sqlalchemy
+alembic
+aiosqlite
+
+# Authentication
+python-jose[cryptography]
+passlib[bcrypt]
+
+# Validation
+pydantic
+pydantic-settings
+email-validator
+
+# File handling
+aiofiles
+
+# Utils
+python-slugify
+python-dateutil
+httpx
+
+# Templates
+jinja2

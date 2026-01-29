@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ tag.name }} - Modern CMS{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header" style="margin-bottom: 2rem;">
+        <h1><i class="fas fa-tag"></i> {{ tag.name }}</h1>
+        <p>{{ total }} ta maqola topildi</p>
+    </div>
+
+    <div class="posts-grid">
+        {% for post in posts %}
+        <article class="post-card">
+            <div class="post-card-image">
+                <a href="/post/{{ post.slug }}">
+                    <img src="{{ post.thumbnail or '/static/images/default-post.jpg' }}" alt="">
+                </a>
+            </div>
+            <div class="post-card-content">
+                <h3 class="post-card-title"><a href="/post/{{ post.slug }}">{{ post.title }}</a></h3>
+                <p class="post-card-excerpt">{{ post.short_content }}</p>
+                <div class="post-card-meta">
+                    <span>{{ post.created_at.strftime('%d.%m.%Y') }}</span>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% for p in range(1, total_pages + 1) %}
+        <a href="?page={{ p }}" class="{% if p == page %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+{% block title %}Izohlar{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Izohlar</h1>
+</div>
+
+<div class="admin-card">
+    <div class="card-body">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Muallif</th>
+                    <th>Matn</th>
+                    <th>Maqola</th>
+                    <th>Sana</th>
+                    <th>Status</th>
+                    <th>Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comment in comments %}
+                <tr>
+                    <td>{{ comment.author.username if comment.author else comment.guest_name }}</td>
+                    <td>{{ comment.content[:50] }}...</td>
+                    <td><a href="/post/{{ comment.post.slug }}">{{ comment.post.title[:30] }}...</a></td>
+                    <td>{{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td><span class="badge {{ 'badge-success' if comment.is_approved else 'badge-warning' }}">{{
+                            'Tasdiqlangan' if comment.is_approved else 'Kutilmoqda' }}</span></td>
+                    <td class="actions">
+                        {% if not comment.is_approved %}
+                        <form action="/admin/comments/{{ comment.id }}/approve" method="post" style="display:inline">
+                            <button class="btn-icon" title="Tasdiqlash"><i class="fas fa-check"></i></button>
+                        </form>
+                        {% endif %}
+                        <form action="/admin/comments/{{ comment.id }}/delete" method="post" style="display:inline">
+                            <button class="btn-icon btn-danger" title="O'chirish"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Maqolani tahrirlash' if post else 'Yangi maqola' }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>{{ 'Maqolani tahrirlash' if post else 'Yangi maqola qo\'shish' }}</h1>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="post-form">
+    <div class="form-grid">
+        <div class="form-main">
+            <div class="admin-card">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Sarlavha</label>
+                        <input type="text" name="title" class="form-control" value="{{ post.title if post else '' }}"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label>Qisqa matn</label>
+                        <textarea name="short_content" class="form-control"
+                            rows="3">{{ post.short_content if post else '' }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>To'liq matn</label>
+                        <textarea name="full_content" class="form-control editor"
+                            rows="15">{{ post.full_content if post else '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>SEO</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Meta sarlavha</label>
+                        <input type="text" name="meta_title" class="form-control"
+                            value="{{ post.meta_title if post else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Meta tavsif</label>
+                        <textarea name="meta_description" class="form-control"
+                            rows="2">{{ post.meta_description if post else '' }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Kalit so'zlar</label>
+                        <input type="text" name="meta_keywords" class="form-control"
+                            value="{{ post.meta_keywords if post else '' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-sidebar">
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>Nashr qilish</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label><input type="checkbox" name="is_published" {{ 'checked' if not post or post.is_published
+                                }}> Faol</label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" name="is_featured" {{ 'checked' if post and post.is_featured }}>
+                            Featured</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg" style="width:100%">{{ 'Saqlash' if post else
+                        'Nashr qilish' }}</button>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>Kategoriya</h3>
+                </div>
+                <div class="card-body">
+                    <div class="categories-list">
+                        {% for cat in categories %}
+                        <label><input type="checkbox" name="category_ids" value="{{ cat.id }}" {{ 'checked' if post and
+                                cat in post.categories }}> {{ cat.name }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>Teglar</h3>
+                </div>
+                <div class="card-body">
+                    <input type="text" name="tags" class="form-control" placeholder="tag1, tag2, tag3"
+                        value="{{ post.tags|map(attribute='name')|join(', ') if post else '' }}">
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>Rasm</h3>
+                </div>
+                <div class="card-body">
+                    {% if post and post.thumbnail %}
+                    <img src="{{ post.thumbnail }}" alt="" class="current-image">
+                    {% endif %}
+                    <input type="file" name="thumbnail" accept="image/*">
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
